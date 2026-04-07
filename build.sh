@@ -42,7 +42,7 @@ echo "Build tags: $TAGS"
 VERSION_PKG="tailscale.com/version"
 SHORT="${TAILSCALE_VERSION#v}"
 LONG="${SHORT}-g$(cd "$SRC_DIR" && git rev-parse --short HEAD)"
-LDFLAGS="-s -w -X ${VERSION_PKG}.longStamp=${LONG} -X ${VERSION_PKG}.shortStamp=${SHORT}"
+LDFLAGS="-s -w -X ${VERSION_PKG}.longStamp=${LONG} -X ${VERSION_PKG}.shortStamp=${SHORT} ${CUSTOM_LDFLAGS:-}"
 
 # ── Helper: parse GOARCH:VARIANT ────────────────────────────────
 parse_arch() {

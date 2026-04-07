@@ -11,8 +11,6 @@ on:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 jobs:
   # ── Resolve version & build matrix ────────────────────────────
@@ -95,18 +93,12 @@ jobs:
           chmod +x build.sh
           ./build.sh "${{ matrix.arch }}"
 
-      - name: Package .ipk
-        run: |
-          chmod +x package.sh
-          ./package.sh "${{ matrix.arch }}"
-
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ipk-${{ matrix.arch }}
+          name: binary-${{ matrix.arch }}
           path: |
-            tailscale_*.ipk
-            feed/
+            tailscale.combined.*
 
   # ── Collect artifacts, release, deploy feed ───────────────────
   release:
@@ -117,7 +109,7 @@ jobs:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: ipk-*
+          pattern: binary-*
           merge-multiple: true
 
       - name: Create GitHub Release
@@ -130,15 +122,7 @@ jobs:
 
           Architectures: $(echo '${{ needs.prepare.outputs.matrix }}' | jq -r 'join(", ")')
 
-          Install via opkg feed or download the .ipk directly." \
-            tailscale_*.ipk
+          Download the appropriate binary for your architecture and deploy it to your OpenWRT device." \
+            tailscale.combined.*
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Deploy opkg feed to gh-pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./feed
-          destination_dir: .
-          keep_files: false
